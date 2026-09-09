@@ -35,6 +35,61 @@ docker compose up -d --build
 - 後台： http://localhost:8080 （用 `.env` 的 `ADMIN_USERNAME/ADMIN_PASSWORD` 登入）
 - 客戶端 API： `POST http://localhost:8080/api/v1/activate`、`/api/v1/verify`
 
+## Docker Compose 設定
+```yaml
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - ${HTTP_PORT:-8080}:80
+    depends_on:
+      - backend
+    # default: reach `backend` internally; npm_bridge: reachable by Nginx Proxy
+    # Manager for a domain + HTTPS (proxy target: verify-frontend:80).
+    networks:
+      - default
+      - npm_bridge
+volumes:
+  pgdata: null
+networks:
+  npm_bridge:
+    external: true
+```
+
 ## 客戶端串接
 1. 把 `APP_SECRET` 與 Ed25519 **公鑰 PEM**（後台「統計儀表板」可複製）內嵌到你的客戶端程式。
 2. 每次請求帶 header：`x-timestamp`(unix ms)、`x-nonce`(隨機 hex)、`x-signature`(HMAC-SHA256)。
