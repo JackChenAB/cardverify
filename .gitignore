@@ -1,0 +1,26 @@
+# dependencies
+**/node_modules
+
+# build output
+backend/dist
+frontend/dist
+**/coverage
+**/target
+
+# env / secrets
+.env
+*.local
+
+# editor / OS
+.vs/
+.idea/
+.DS_Store
+*.log
+
+# local dev embedded postgres data
+backend/.pgdata/
+
+# production secrets (never commit)
+prod.env
+
+/.github

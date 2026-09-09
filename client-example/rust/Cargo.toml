@@ -1,0 +1,26 @@
+[package]
+name = "cardverify-client"
+version = "0.1.0"
+edition = "2021"
+description = "Rust console sample: card-key activation/verification client for cardverify"
+
+[[bin]]
+name = "cardverify-client"
+path = "src/main.rs"
+
+[dependencies]
+# native-tls: server is https (card.smallab.win). On Windows this uses SChannel
+# (no ring/NASM/OpenSSL), so it cross-compiles to a standalone .exe cleanly.
+ureq = { version = "2", default-features = false, features = ["native-tls"] }
+native-tls = "0.2" # construct the TLS connector to wire into the ureq Agent
+serde_json = "1"
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+getrandom = "0.2"
+ed25519-dalek = { version = "2", features = ["pkcs8", "pem"] }
+
+[profile.release]
+strip = true
+lto = true

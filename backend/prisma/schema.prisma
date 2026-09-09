@@ -1,0 +1,84 @@
+// Prisma schema for the card-key verification system.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CardStatus {
+  UNUSED
+  ACTIVE
+  EXPIRED
+  BANNED
+}
+
+enum VerifyAction {
+  ACTIVATE
+  VERIFY
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+
+  batches Batch[]
+}
+
+model Batch {
+  id           Int      @id @default(autoincrement())
+  name         String
+  count        Int
+  durationDays Int? // null = permanent
+  note         String?
+  createdBy    Admin?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdById  Int?
+  createdAt    DateTime @default(now())
+
+  cards CardKey[]
+}
+
+model CardKey {
+  id           Int        @id @default(autoincrement())
+  code         String     @unique
+  status       CardStatus @default(UNUSED)
+  durationDays Int? // null = permanent
+  hwid         String? // bound on first activation
+  activatedAt  DateTime?
+  expiresAt    DateTime? // null = never expires
+  note         String?
+  batch        Batch?     @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  batchId      Int?
+  // Heartbeat / online-status + single-instance (multi-open) tracking.
+  lastSeenAt    DateTime? // updated on every successful verify; null = never verified. Note: also bumps updatedAt.
+  sessionId     String? // currently-active client session token; null = no active session
+  sessionSeenAt DateTime? // when sessionId was last refreshed; a stale one may be taken over
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  logs VerifyLog[]
+
+  @@index([status])
+  @@index([hwid])
+  @@index([batchId])
+}
+
+model VerifyLog {
+  id        Int          @id @default(autoincrement())
+  card      CardKey?     @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  cardId    Int?
+  codeTried String
+  hwid      String?
+  ip        String?
+  action    VerifyAction
+  result    String // OK | NOT_FOUND | BANNED | EXPIRED | HWID_MISMATCH | NOT_ACTIVATED | CONCURRENT_SESSION
+  createdAt DateTime     @default(now())
+
+  @@index([action, result, createdAt])
+  @@index([cardId])
+}
