@@ -133,6 +133,7 @@ cd frontend && npm i && npm run dev          # http://localhost:5173 (proxy 到 
 ```
 
 ## 安全說明
+```
 客戶端內嵌的 `APP_SECRET` 可被逆向取出——真正的保證在「**伺服器端狀態 + 回應的 Ed25519 簽章**」：
 攻擊者即使改 hosts／攔截改回 `valid:true`，沒有伺服器私鑰也無法產生有效簽章。
 上線務必：使用 HTTPS、妥善保管 `ED25519_PRIVATE_KEY`、定期更換密鑰、限制資料庫對外。
