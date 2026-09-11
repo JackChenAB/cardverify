@@ -5,7 +5,7 @@
 **A self-hosted license-key platform for issuing, activating, binding, and verifying software licenses.**<br>
 **可自行部署的軟體授權平台：發卡、啟用、綁機、驗證與管理，一套完成。**
 
-[繁體中文](#繁體中文) · [English](#english)
+[繁體中文](#繁體中文) · [English](#english) · [Support / 贊助](#support--贊助)
 
 `Vue 3` · `NestJS` · `PostgreSQL` · `Redis` · `Docker Compose`
 
@@ -47,6 +47,7 @@ Keyline 是一套面向桌面程式或原生客戶端的授權卡密系統。管
 - **HWID 綁機**：一卡一機，管理員可保留剩餘時間並解除綁定。
 - **會話監測**：心跳、在線狀態與多開頂號策略。
 - **管理後台**：批量產卡、搜尋、篩選、排序、加時、CSV 匯出與統計儀表板。
+- **雙語介面**：繁體中文與 English 即時切換，並在瀏覽器記住語言偏好。
 - **雙向驗證**：請求使用 HMAC-SHA256；回應使用 Ed25519。
 - **容器化部署**：前端、後端、PostgreSQL 與 Redis 由 Docker Compose 管理。
 
@@ -337,6 +338,7 @@ Keyline is a self-hosted license-key service for desktop and native applications
 - One-device-per-license HWID binding and administrative unbinding.
 - Heartbeats, online presence, and concurrent-session control.
 - Polished admin console with batch issuance, filtering, CSV export, and analytics.
+- Instant Traditional Chinese / English switching with a persisted language preference.
 - HMAC-SHA256 request authentication and Ed25519 response verification.
 - Reproducible deployment with Docker Compose.
 
@@ -552,9 +554,32 @@ docker compose config -q
 
 ---
 
+## Support / 贊助
+
+<p align="center">
+  如果這個專案對你有幫助，歡迎請我喝杯咖啡，支持後續維護與新功能開發。<br>
+  If this project helps you, consider buying me a coffee to support maintenance and future development.
+</p>
+
+<p align="center">
+  <a href="https://buymeacoffee.com/smallab">
+    <img src="./docs/images/buy-me-a-coffee-qr.png" alt="Buy Me a Coffee — smallab QR code" width="260">
+  </a>
+</p>
+
+<p align="center">
+  <strong><a href="https://buymeacoffee.com/smallab">☕ Buy Me a Coffee · smallab</a></strong>
+</p>
+
+---
+
 ## Maintainer notes
 
 - Keep `.env`, `prod.env`, database dumps, and private keys outside commits.
 - Review `docker compose ps` and service logs after every deployment.
 - Update both language sections when deployment behavior changes.
 - Use Issues for reproducible bug reports and include Docker/Compose versions, relevant logs, and exact reproduction steps.
+
+## License
+
+Released under the [MIT License](./LICENSE).

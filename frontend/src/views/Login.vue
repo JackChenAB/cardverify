@@ -3,16 +3,19 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { adminApi } from '../api';
+import LanguageSwitch from '../components/LanguageSwitch.vue';
+import { useI18n } from '../i18n';
 import { useAuthStore } from '../store/auth';
 
 const router = useRouter();
 const auth = useAuthStore();
+const { t } = useI18n();
 const loading = ref(false);
 const form = reactive({ username: '', password: '' });
 
 async function submit() {
   if (!form.username || !form.password) {
-    ElMessage.warning('請輸入帳號與密碼');
+    ElMessage.warning(t('login.validation'));
     return;
   }
   loading.value = true;
@@ -21,7 +24,7 @@ async function submit() {
     auth.setSession(res.access_token, res.username);
     router.push({ name: 'cards' });
   } catch {
-    ElMessage.error('登入失敗，帳號或密碼錯誤');
+    ElMessage.error(t('login.failed'));
   } finally {
     loading.value = false;
   }
@@ -33,13 +36,13 @@ async function submit() {
     <section class="login-story">
       <div class="story-top"><div class="story-mark">K</div><span>KEYLINE / LICENSE CONTROL</span></div>
       <div class="story-content">
-        <p class="story-kicker">SECURE ACCESS INFRASTRUCTURE</p>
-        <h1>讓每一組授權，<br /><em>清晰可控。</em></h1>
-        <p>集中管理卡密生命週期、裝置綁定與即時啟用狀態，將複雜的授權流程留在一道簡潔介面之後。</p>
+        <p class="story-kicker">{{ t('login.storyKicker') }}</p>
+        <h1>{{ t('login.storyLine1') }}<br /><em>{{ t('login.storyLine2') }}</em></h1>
+        <p>{{ t('login.storyDescription') }}</p>
         <div class="story-metrics">
-          <div><strong>24/7</strong><span>狀態監控</span></div>
-          <div><strong>Ed25519</strong><span>簽章驗證</span></div>
-          <div><strong>01</strong><span>管理入口</span></div>
+          <div><strong>24/7</strong><span>{{ t('login.metricMonitor') }}</span></div>
+          <div><strong>Ed25519</strong><span>{{ t('login.metricSignature') }}</span></div>
+          <div><strong>01</strong><span>{{ t('login.metricEntry') }}</span></div>
         </div>
       </div>
       <div class="signal-art" aria-hidden="true"><div class="signal-ring ring-a" /><div class="signal-ring ring-b" /><div class="signal-dot" /></div>
@@ -47,22 +50,23 @@ async function submit() {
     </section>
 
     <section class="login-panel">
+      <LanguageSwitch class="login-language" />
       <div class="login-card">
-        <p class="eyebrow">ADMINISTRATOR ACCESS</p>
-        <h2>歡迎回來</h2>
-        <p class="login-note">請使用管理員憑證進入授權控制中心。</p>
+        <p class="eyebrow">{{ t('login.access') }}</p>
+        <h2>{{ t('login.title') }}</h2>
+        <p class="login-note">{{ t('login.note') }}</p>
         <el-form label-position="top" @submit.prevent="submit">
-          <el-form-item label="管理員帳號">
-            <el-input v-model="form.username" size="large" placeholder="輸入帳號" prefix-icon="User" autocomplete="username" />
+          <el-form-item :label="t('login.username')">
+            <el-input v-model="form.username" size="large" :placeholder="t('login.usernamePlaceholder')" prefix-icon="User" autocomplete="username" />
           </el-form-item>
-          <el-form-item label="安全密碼">
-            <el-input v-model="form.password" size="large" type="password" placeholder="輸入密碼" prefix-icon="Lock" autocomplete="current-password" show-password @keyup.enter="submit" />
+          <el-form-item :label="t('login.password')">
+            <el-input v-model="form.password" size="large" type="password" :placeholder="t('login.passwordPlaceholder')" prefix-icon="Lock" autocomplete="current-password" show-password @keyup.enter="submit" />
           </el-form-item>
           <el-button type="primary" size="large" :loading="loading" class="submit-button" @click="submit">
-            <span>進入控制中心</span><span aria-hidden="true">↗</span>
+            <span>{{ t('login.submit') }}</span><span aria-hidden="true">↗</span>
           </el-button>
         </el-form>
-        <div class="secure-note"><Lock /><span>登入連線受到加密保護</span></div>
+        <div class="secure-note"><Lock /><span>{{ t('login.secure') }}</span></div>
       </div>
     </section>
   </div>
@@ -89,7 +93,8 @@ async function submit() {
 .signal-ring { position: absolute; border: 1px solid rgba(183,243,107,.13); border-radius: 50%; }
 .ring-a { inset: 0; } .ring-b { inset: 18%; }
 .signal-dot { position: absolute; top: 19%; left: 12%; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 24px rgba(183,243,107,.65); animation: float-dot 4s ease-in-out infinite; }
-.login-panel { display: grid; min-height: 100vh; place-items: center; padding: clamp(30px,7vw,100px); }
+.login-panel { position: relative; display: grid; min-height: 100vh; place-items: center; padding: clamp(30px,7vw,100px); }
+.login-language { position: absolute; top: clamp(24px,4vw,48px); right: clamp(24px,4vw,54px); }
 .login-card { width: min(100%,430px); animation: enter 600ms cubic-bezier(.2,.75,.2,1) both; }
 .login-card h2 { margin: 0; font-family: 'Syne',sans-serif; font-size: clamp(36px,4vw,52px); line-height: 1; letter-spacing: -.055em; }
 .login-note { margin: 15px 0 36px; color: var(--muted); font-size: 13px; line-height: 1.7; }
@@ -104,7 +109,8 @@ async function submit() {
 @media (max-width: 900px) {
   .login-wrap { display: block; } .login-story { min-height: 42vh; padding: 26px; } .story-content { padding: 66px 0 48px; }
   .story-content h1 { font-size: clamp(40px,10vw,66px); } .story-content > p:not(.story-kicker), .story-metrics { display: none; }
-  .story-foot { display: none; } .login-panel { min-height: 58vh; padding: 48px 24px 60px; }
+  .story-foot { display: none; } .login-panel { min-height: 58vh; padding: 70px 24px 60px; }
+  .login-language { top: 20px; right: 20px; }
 }
 @media (max-width: 520px) { .story-content { padding-top: 50px; } .story-content h1 { font-size: 40px; } }
 </style>

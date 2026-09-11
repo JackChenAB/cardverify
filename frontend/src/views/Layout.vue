@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import LanguageSwitch from '../components/LanguageSwitch.vue';
+import { useI18n } from '../i18n';
 import { useAuthStore } from '../store/auth';
 
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+const { t } = useI18n();
 const active = computed(() => route.name as string);
 const currentMeta = computed(() =>
   active.value === 'dashboard'
-    ? { index: '02', title: '統計儀表板' }
-    : { index: '01', title: '卡密管理' },
+    ? { index: '02', title: t('layout.dashboard') }
+    : { index: '01', title: t('layout.licenses') },
 );
 
 function logout() {
@@ -22,7 +25,7 @@ function logout() {
 <template>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand" aria-label="Keyline 授權管理中心">
+      <div class="brand" :aria-label="t('layout.brandAria')">
         <div class="brand-mark"><span>K</span></div>
         <div class="brand-copy">
           <strong>KEYLINE</strong>
@@ -31,24 +34,24 @@ function logout() {
       </div>
 
       <div class="rail-label">CONTROL PANEL</div>
-      <nav class="nav-list" aria-label="主要導覽">
+      <nav class="nav-list" :aria-label="t('layout.navAria')">
         <router-link :to="{ name: 'cards' }" class="nav-item" :class="{ active: active === 'cards' }">
           <span class="nav-index">01</span>
           <span class="nav-icon"><Tickets /></span>
-          <span class="nav-copy"><strong>卡密管理</strong><small>Licenses</small></span>
+          <span class="nav-copy"><strong>{{ t('layout.licenses') }}</strong><small>Licenses</small></span>
           <span class="nav-arrow">↗</span>
         </router-link>
         <router-link :to="{ name: 'dashboard' }" class="nav-item" :class="{ active: active === 'dashboard' }">
           <span class="nav-index">02</span>
           <span class="nav-icon"><DataLine /></span>
-          <span class="nav-copy"><strong>統計儀表板</strong><small>Overview</small></span>
+          <span class="nav-copy"><strong>{{ t('layout.dashboard') }}</strong><small>Overview</small></span>
           <span class="nav-arrow">↗</span>
         </router-link>
       </nav>
 
       <div class="sidebar-status">
         <div class="status-pulse" aria-hidden="true" />
-        <div><strong>服務運作中</strong><small>All systems operational</small></div>
+        <div><strong>{{ t('layout.serviceOnline') }}</strong><small>{{ t('layout.systemsOperational') }}</small></div>
       </div>
       <div class="sidebar-orbit" aria-hidden="true"><span /></div>
     </aside>
@@ -61,9 +64,10 @@ function logout() {
           <strong>{{ currentMeta.title }}</strong>
         </div>
         <div class="account">
+          <LanguageSwitch />
           <div class="account-avatar">{{ auth.username?.slice(0, 1).toUpperCase() || 'A' }}</div>
-          <div class="account-copy"><strong>{{ auth.username || 'admin' }}</strong><small>Administrator</small></div>
-          <button class="logout-button" type="button" aria-label="登出" title="登出" @click="logout">
+          <div class="account-copy"><strong>{{ auth.username || 'admin' }}</strong><small>{{ t('common.administrator') }}</small></div>
+          <button class="logout-button" type="button" :aria-label="t('common.logout')" :title="t('common.logout')" @click="logout">
             <SwitchButton />
           </button>
         </div>

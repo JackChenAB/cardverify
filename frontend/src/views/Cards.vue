@@ -2,7 +2,9 @@
 import { onMounted, reactive, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { adminApi, type CardItem } from '../api';
+import { useI18n, type MessageKey } from '../i18n';
 
+const { locale, t } = useI18n();
 const loading = ref(false);
 const rows = ref<CardItem[]>([]);
 const total = ref(0);
@@ -26,28 +28,36 @@ const statusType: Record<string, string> = {
 // Remaining time. Activated cards count down from expiresAt (matches the client);
 // unactivated cards show their issued grant (clock hasn't started yet).
 function remainText(row: CardItem): string {
-  if (row.status === 'BANNED') return '已封禁';
+  if (row.status === 'BANNED') return t('cards.remainBanned');
   if (!row.activatedAt) {
-    return row.durationDays == null ? '永久' : `${row.durationDays} 天（未啟用）`;
+    return row.durationDays == null ? t('cards.permanent') : t('cards.remainUnused', { days: row.durationDays });
   }
-  if (row.expiresAt == null) return '永久';
+  if (row.expiresAt == null) return t('cards.permanent');
   const ms = Date.parse(row.expiresAt) - Date.now();
-  if (ms <= 0) return '已過期';
+  if (ms <= 0) return t('cards.remainExpired');
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor((ms % 86400000) / 3600000);
-  return days > 0 ? `${days} 天 ${hours} 時` : `${hours} 時`;
+  return days > 0 ? t('cards.remainDaysHours', { days, hours }) : t('cards.remainHours', { hours });
 }
 
 // Relative "last seen" for the online column (offline rows show how long ago).
 function lastSeenText(row: CardItem): string {
-  if (!row.lastSeenAt) return '從未';
+  if (!row.lastSeenAt) return t('cards.never');
   const ms = Date.now() - Date.parse(row.lastSeenAt);
-  if (ms < 60000) return '剛剛';
+  if (ms < 60000) return t('cards.justNow');
   const mins = Math.floor(ms / 60000);
-  if (mins < 60) return `${mins} 分鐘前`;
+  if (mins < 60) return t('cards.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} 小時前`;
-  return `${Math.floor(hours / 24)} 天前`;
+  if (hours < 24) return t('cards.hoursAgo', { count: hours });
+  return t('cards.daysAgo', { count: Math.floor(hours / 24) });
+}
+
+function formatDate(value: string): string {
+  return new Date(value).toLocaleString(locale.value === 'en' ? 'en-US' : 'zh-TW');
+}
+
+function noteText(note: string | null): string {
+  return note === '違規' ? t('cards.demoViolation') : note || '—';
 }
 
 function params() {
@@ -99,7 +109,7 @@ const generated = ref<string[]>([]);
 const resultDialog = ref(false);
 
 async function createBatch() {
-  if (!batchForm.name) return ElMessage.warning('請填寫批次名稱');
+  if (!batchForm.name) return ElMessage.warning(t('cards.batchNameRequired'));
   try {
     const res = await adminApi.createBatch({
       name: batchForm.name,
@@ -112,29 +122,29 @@ async function createBatch() {
     resultDialog.value = true;
     load();
   } catch {
-    ElMessage.error('產生失敗');
+    ElMessage.error(t('cards.generateFailed'));
   }
 }
 
 function copyCodes() {
   navigator.clipboard.writeText(generated.value.join('\n'));
-  ElMessage.success('已複製到剪貼簿');
+  ElMessage.success(t('cards.copied'));
 }
 
 // ----- row actions -----
-async function act(fn: () => Promise<unknown>, ok: string) {
+async function act(fn: () => Promise<unknown>, ok: MessageKey) {
   try {
     await fn();
-    ElMessage.success(ok);
+    ElMessage.success(t(ok));
     load();
   } catch {
-    ElMessage.error('操作失敗');
+    ElMessage.error(t('cards.actionFailed'));
   }
 }
 
 function confirmDelete(row: CardItem) {
-  ElMessageBox.confirm(`確定刪除卡密 ${row.code}？`, '刪除', { type: 'warning' })
-    .then(() => act(() => adminApi.remove(row.id), '已刪除'))
+  ElMessageBox.confirm(t('cards.deleteConfirm', { code: row.code }), t('cards.delete'), { type: 'warning' })
+    .then(() => act(() => adminApi.remove(row.id), 'cards.deleted'))
     .catch(() => undefined);
 }
 
@@ -166,7 +176,7 @@ function openExtend() {
 
 async function submitExtend() {
   if (extendForm.scope === 'ids' && selected.value.length === 0) {
-    return ElMessage.warning('請先勾選要加時長的卡密');
+    return ElMessage.warning(t('cards.selectForExtend'));
   }
   try {
     const payload: any = { days: extendForm.days, scope: extendForm.scope };
@@ -179,10 +189,10 @@ async function submitExtend() {
     }
     const res = await adminApi.extendCards(payload);
     extendDialog.value = false;
-    ElMessage.success(`已延長 ${res.extended} 張，略過 ${res.skipped} 張（過期/封禁/永久）`);
+    ElMessage.success(t('cards.extendSuccess', { extended: res.extended, skipped: res.skipped }));
     load();
   } catch {
-    ElMessage.error('加時長失敗');
+    ElMessage.error(t('cards.extendFailed'));
   }
 }
 
@@ -194,37 +204,37 @@ onMounted(load);
     <header class="page-head">
       <div>
         <p class="eyebrow">LICENSE INVENTORY / CONTROL</p>
-        <h1 class="page-title">管理每一組存取憑證。</h1>
-        <p class="page-subtitle">搜尋、發行與維護卡密狀態。所有關鍵操作集中在同一個工作視圖。</p>
+        <h1 class="page-title">{{ t('cards.title') }}</h1>
+        <p class="page-subtitle">{{ t('cards.subtitle') }}</p>
       </div>
       <div class="head-actions">
-        <el-button @click="exportCsv"><Download />匯出 CSV</el-button>
-        <el-button type="success" @click="batchDialog = true"><Plus />批量產卡</el-button>
+        <el-button @click="exportCsv"><Download />{{ t('cards.export') }}</el-button>
+        <el-button type="success" @click="batchDialog = true"><Plus />{{ t('cards.batchCreate') }}</el-button>
       </div>
     </header>
 
     <section class="filter-panel">
       <div class="filter-heading">
-        <div><Operation /><span>篩選條件</span><small>FILTER SET</small></div>
-        <span class="result-count"><strong>{{ total }}</strong> 組結果</span>
+        <div><Operation /><span>{{ t('cards.filters') }}</span><small>FILTER SET</small></div>
+        <span class="result-count">{{ t('cards.resultCount', { count: total }) }}</span>
       </div>
       <el-form :inline="true" class="filter-form" @submit.prevent="search">
-        <el-form-item label="狀態">
-          <el-select v-model="query.status" placeholder="全部狀態" clearable>
-            <el-option label="未使用" value="UNUSED" />
-            <el-option label="使用中" value="ACTIVE" />
-            <el-option label="已過期" value="EXPIRED" />
-            <el-option label="已封禁" value="BANNED" />
+        <el-form-item :label="t('cards.status')">
+          <el-select v-model="query.status" :placeholder="t('cards.allStatuses')" clearable>
+            <el-option :label="t('cards.statusUnused')" value="UNUSED" />
+            <el-option :label="t('cards.statusActive')" value="ACTIVE" />
+            <el-option :label="t('cards.statusExpired')" value="EXPIRED" />
+            <el-option :label="t('cards.statusBanned')" value="BANNED" />
           </el-select>
         </el-form-item>
-        <el-form-item label="卡密">
-          <el-input v-model="query.code" placeholder="輸入卡密片段" clearable prefix-icon="Search" />
+        <el-form-item :label="t('cards.code')">
+          <el-input v-model="query.code" :placeholder="t('cards.codePlaceholder')" clearable prefix-icon="Search" />
         </el-form-item>
-        <el-form-item label="裝置 HWID">
-          <el-input v-model="query.hwid" placeholder="輸入機器碼" clearable prefix-icon="Monitor" />
+        <el-form-item :label="t('cards.hwid')">
+          <el-input v-model="query.hwid" :placeholder="t('cards.hwidPlaceholder')" clearable prefix-icon="Monitor" />
         </el-form-item>
         <el-form-item class="filter-submit">
-          <el-button type="primary" native-type="submit"><Search />套用篩選</el-button>
+          <el-button type="primary" native-type="submit"><Search />{{ t('cards.applyFilters') }}</el-button>
         </el-form-item>
       </el-form>
     </section>
@@ -232,47 +242,47 @@ onMounted(load);
     <section class="table-panel">
       <div class="table-toolbar">
         <div>
-          <span class="table-title">卡密清單</span>
-          <span v-if="selected.length" class="selected-badge">已選 {{ selected.length }} 張</span>
+          <span class="table-title">{{ t('cards.list') }}</span>
+          <span v-if="selected.length" class="selected-badge">{{ t('cards.selected', { count: selected.length }) }}</span>
         </div>
         <el-button type="warning" :plain="!selected.length" @click="openExtend">
-          <Timer />加時長<span v-if="selected.length">（{{ selected.length }}）</span>
+          <Timer />{{ t('cards.extend') }}<span v-if="selected.length"> ({{ selected.length }})</span>
         </el-button>
       </div>
 
       <div class="table-scroll">
         <el-table v-loading="loading" :data="rows" @selection-change="onSelectionChange" @sort-change="onSortChange">
           <el-table-column type="selection" width="48" />
-          <el-table-column prop="code" label="卡密" width="210">
+          <el-table-column prop="code" :label="t('cards.code')" width="210">
             <template #default="{ row }"><span class="code-cell">{{ row.code }}</span></template>
           </el-table-column>
-          <el-table-column label="狀態" width="108" column-key="status" sortable="custom">
+          <el-table-column :label="t('cards.status')" width="108" column-key="status" sortable="custom">
             <template #default="{ row }"><el-tag :type="statusType[row.status]" effect="light" round>{{ row.status }}</el-tag></template>
           </el-table-column>
-          <el-table-column label="剩餘時長" width="145" column-key="remaining" sortable="custom">
-            <template #default="{ row }"><span class="time-cell" :class="{ urgent: row.status === 'EXPIRED' || row.status === 'BANNED' }" :title="`發行天數：${row.durationDays ?? '永久'}`">{{ remainText(row) }}</span></template>
+          <el-table-column :label="t('cards.remaining')" width="145" column-key="remaining" sortable="custom">
+            <template #default="{ row }"><span class="time-cell" :class="{ urgent: row.status === 'EXPIRED' || row.status === 'BANNED' }" :title="t('cards.issuedDays', { value: row.durationDays ?? t('cards.permanent') })">{{ remainText(row) }}</span></template>
           </el-table-column>
-          <el-table-column prop="hwid" label="HWID" min-width="165" show-overflow-tooltip>
-            <template #default="{ row }"><span :class="row.hwid ? 'hwid-cell' : 'empty-cell'">{{ row.hwid || '尚未綁定' }}</span></template>
+          <el-table-column prop="hwid" :label="t('cards.hwid')" min-width="165" show-overflow-tooltip>
+            <template #default="{ row }"><span :class="row.hwid ? 'hwid-cell' : 'empty-cell'">{{ row.hwid || t('cards.unbound') }}</span></template>
           </el-table-column>
-          <el-table-column label="在線狀態" width="140">
+          <el-table-column :label="t('cards.presence')" width="140">
             <template #default="{ row }">
-              <span v-if="row.online" class="online-state"><i />在線</span>
-              <span v-else class="offline-state" :title="row.lastSeenAt ? new Date(row.lastSeenAt).toLocaleString() : ''">離線 · {{ lastSeenText(row) }}</span>
+              <span v-if="row.online" class="online-state"><i />{{ t('cards.online') }}</span>
+              <span v-else class="offline-state" :title="row.lastSeenAt ? formatDate(row.lastSeenAt) : ''">{{ t('cards.offline', { time: lastSeenText(row) }) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="到期時間" width="180" column-key="expiresAt" sortable="custom">
-            <template #default="{ row }"><span class="date-cell">{{ row.expiresAt ? new Date(row.expiresAt).toLocaleString() : '—' }}</span></template>
+          <el-table-column :label="t('cards.expiresAt')" width="180" column-key="expiresAt" sortable="custom">
+            <template #default="{ row }"><span class="date-cell">{{ row.expiresAt ? formatDate(row.expiresAt) : '—' }}</span></template>
           </el-table-column>
-          <el-table-column prop="note" label="備註" min-width="125" show-overflow-tooltip>
-            <template #default="{ row }"><span :class="row.note ? '' : 'empty-cell'">{{ row.note || '—' }}</span></template>
+          <el-table-column prop="note" :label="t('cards.note')" min-width="125" show-overflow-tooltip>
+            <template #default="{ row }"><span :class="row.note ? '' : 'empty-cell'">{{ noteText(row.note) }}</span></template>
           </el-table-column>
-          <el-table-column label="操作" width="188" fixed="right">
+          <el-table-column :label="t('cards.actions')" width="188" fixed="right">
             <template #default="{ row }">
-              <el-button v-if="row.status !== 'BANNED'" size="small" type="danger" plain @click="act(() => adminApi.ban(row.id), '已封禁')">封禁</el-button>
-              <el-button v-else size="small" type="success" plain @click="act(() => adminApi.unban(row.id), '已解封')">解封</el-button>
-              <el-button size="small" plain @click="act(() => adminApi.unbind(row.id), '已解綁')">解綁</el-button>
-              <el-button class="icon-delete" size="small" type="danger" plain aria-label="刪除" title="刪除" @click="confirmDelete(row)"><Delete /></el-button>
+              <el-button v-if="row.status !== 'BANNED'" size="small" type="danger" plain @click="act(() => adminApi.ban(row.id), 'cards.bannedOk')">{{ t('cards.ban') }}</el-button>
+              <el-button v-else size="small" type="success" plain @click="act(() => adminApi.unban(row.id), 'cards.unbannedOk')">{{ t('cards.unban') }}</el-button>
+              <el-button size="small" plain @click="act(() => adminApi.unbind(row.id), 'cards.unboundOk')">{{ t('cards.unbind') }}</el-button>
+              <el-button class="icon-delete" size="small" type="danger" plain :aria-label="t('cards.delete')" :title="t('cards.delete')" @click="confirmDelete(row)"><Delete /></el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -284,36 +294,36 @@ onMounted(load);
       </div>
     </section>
 
-    <el-dialog v-model="batchDialog" title="批量產生卡密" width="min(92vw, 480px)">
-      <p class="dialog-note">建立一批新的授權卡密，效期將從首次啟用開始計算。</p>
+    <el-dialog v-model="batchDialog" :title="t('cards.batchDialogTitle')" width="min(92vw, 480px)">
+      <p class="dialog-note">{{ t('cards.batchDialogNote') }}</p>
       <el-form label-position="top">
-        <el-form-item label="批次名稱"><el-input v-model="batchForm.name" placeholder="例如：九月合作夥伴" /></el-form-item>
+        <el-form-item :label="t('cards.batchName')"><el-input v-model="batchForm.name" :placeholder="t('cards.batchNamePlaceholder')" /></el-form-item>
         <div class="dialog-grid">
-          <el-form-item label="產生數量"><el-input-number v-model="batchForm.count" :min="1" :max="10000" /></el-form-item>
-          <el-form-item label="授權類型"><el-switch v-model="batchForm.permanent" active-text="永久" inactive-text="限時" /></el-form-item>
+          <el-form-item :label="t('cards.batchCount')"><el-input-number v-model="batchForm.count" :min="1" :max="10000" /></el-form-item>
+          <el-form-item :label="t('cards.licenseType')"><el-switch v-model="batchForm.permanent" :active-text="t('cards.permanent')" :inactive-text="t('cards.timed')" /></el-form-item>
         </div>
-        <el-form-item v-if="!batchForm.permanent" label="有效天數"><el-input-number v-model="batchForm.durationDays" :min="1" :max="36500" /></el-form-item>
-        <el-form-item label="備註"><el-input v-model="batchForm.note" placeholder="選填，方便後續辨識" /></el-form-item>
+        <el-form-item v-if="!batchForm.permanent" :label="t('cards.validDays')"><el-input-number v-model="batchForm.durationDays" :min="1" :max="36500" /></el-form-item>
+        <el-form-item :label="t('cards.note')"><el-input v-model="batchForm.note" :placeholder="t('cards.notePlaceholder')" /></el-form-item>
       </el-form>
-      <template #footer><el-button @click="batchDialog = false">取消</el-button><el-button type="primary" @click="createBatch">確認產生</el-button></template>
+      <template #footer><el-button @click="batchDialog = false">{{ t('cards.cancel') }}</el-button><el-button type="primary" @click="createBatch">{{ t('cards.confirmGenerate') }}</el-button></template>
     </el-dialog>
 
-    <el-dialog v-model="resultDialog" :title="`已產生 ${generated.length} 組卡密`" width="min(92vw, 480px)">
-      <div class="success-banner"><CircleCheckFilled /><span>卡密已成功建立，請妥善保存。</span></div>
+    <el-dialog v-model="resultDialog" :title="t('cards.generatedTitle', { count: generated.length })" width="min(92vw, 480px)">
+      <div class="success-banner"><CircleCheckFilled /><span>{{ t('cards.generatedSuccess') }}</span></div>
       <el-input class="code-output" type="textarea" :rows="10" :model-value="generated.join('\n')" readonly />
-      <template #footer><el-button type="primary" @click="copyCodes"><CopyDocument />複製全部</el-button><el-button @click="resultDialog = false">關閉</el-button></template>
+      <template #footer><el-button type="primary" @click="copyCodes"><CopyDocument />{{ t('cards.copyAll') }}</el-button><el-button @click="resultDialog = false">{{ t('cards.close') }}</el-button></template>
     </el-dialog>
 
-    <el-dialog v-model="extendDialog" title="統一加時長" width="min(92vw, 480px)">
-      <p class="dialog-note">延長已啟用卡密的到期日，或增加未啟用卡密的有效天數。</p>
+    <el-dialog v-model="extendDialog" :title="t('cards.extendDialogTitle')" width="min(92vw, 480px)">
+      <p class="dialog-note">{{ t('cards.extendDialogNote') }}</p>
       <el-form label-position="top">
-        <el-form-item label="延長天數"><el-input-number v-model="extendForm.days" :min="1" :max="36500" /></el-form-item>
-        <el-form-item label="套用範圍">
-          <el-radio-group v-model="extendForm.scope"><el-radio value="ids" :disabled="selected.length === 0">勾選的 {{ selected.length }} 張</el-radio><el-radio value="filter">符合目前篩選的全部</el-radio></el-radio-group>
+        <el-form-item :label="t('cards.extendDays')"><el-input-number v-model="extendForm.days" :min="1" :max="36500" /></el-form-item>
+        <el-form-item :label="t('cards.scope')">
+          <el-radio-group v-model="extendForm.scope"><el-radio value="ids" :disabled="selected.length === 0">{{ t('cards.selectedScope', { count: selected.length }) }}</el-radio><el-radio value="filter">{{ t('cards.filterScope') }}</el-radio></el-radio-group>
         </el-form-item>
-        <el-alert type="info" :closable="false" show-icon title="已過期、已封禁與永久卡將自動略過。" />
+        <el-alert type="info" :closable="false" show-icon :title="t('cards.skipAlert')" />
       </el-form>
-      <template #footer><el-button @click="extendDialog = false">取消</el-button><el-button type="warning" @click="submitExtend">確定加時長</el-button></template>
+      <template #footer><el-button @click="extendDialog = false">{{ t('cards.cancel') }}</el-button><el-button type="warning" @click="submitExtend">{{ t('cards.confirmExtend') }}</el-button></template>
     </el-dialog>
   </div>
 </template>

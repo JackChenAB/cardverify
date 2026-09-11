@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { adminApi } from '../api';
+import { useI18n } from '../i18n';
 
 interface Stats { total: number; byStatus: Record<string, number>; activations: { day: string; count: number }[]; }
 const stats = ref<Stats | null>(null);
 const pubkey = ref('');
 const copied = ref(false);
+const { t } = useI18n();
 
-const cards = [
-  { key: 'total', label: '總卡密數', note: 'TOTAL LICENSES', tone: 'ink', icon: 'Tickets' },
-  { key: 'UNUSED', label: '未使用', note: 'READY TO ACTIVATE', tone: 'gray', icon: 'Timer' },
-  { key: 'ACTIVE', label: '使用中', note: 'CURRENTLY ACTIVE', tone: 'green', icon: 'Connection' },
-  { key: 'EXPIRED', label: '已過期', note: 'REQUIRES REVIEW', tone: 'orange', icon: 'Clock' },
-  { key: 'BANNED', label: '已封禁', note: 'ACCESS REVOKED', tone: 'red', icon: 'CircleClose' },
-];
+const cards = computed(() => [
+  { key: 'total', label: t('dashboard.total'), note: t('dashboard.totalNote'), tone: 'ink', icon: 'Tickets' },
+  { key: 'UNUSED', label: t('dashboard.unused'), note: t('dashboard.unusedNote'), tone: 'gray', icon: 'Timer' },
+  { key: 'ACTIVE', label: t('dashboard.active'), note: t('dashboard.activeNote'), tone: 'green', icon: 'Connection' },
+  { key: 'EXPIRED', label: t('dashboard.expired'), note: t('dashboard.expiredNote'), tone: 'orange', icon: 'Clock' },
+  { key: 'BANNED', label: t('dashboard.banned'), note: t('dashboard.bannedNote'), tone: 'red', icon: 'CircleClose' },
+]);
 
 function value(key: string) { return stats.value ? (key === 'total' ? stats.value.total : stats.value.byStatus[key] ?? 0) : 0; }
 const maxActivation = computed(() => Math.max(1, ...(stats.value?.activations.map((a) => a.count) ?? [1])));
@@ -36,13 +38,13 @@ onMounted(async () => {
     <header class="page-head">
       <div>
         <p class="eyebrow">SYSTEM PULSE / REALTIME</p>
-        <h1 class="page-title">授權狀態，一目瞭然。</h1>
-        <p class="page-subtitle">從發行到啟用，掌握所有卡密的生命週期與近十四日使用脈動。</p>
+        <h1 class="page-title">{{ t('dashboard.title') }}</h1>
+        <p class="page-subtitle">{{ t('dashboard.subtitle') }}</p>
       </div>
-      <div class="live-badge"><span />LIVE DATA</div>
+      <div class="live-badge"><span />{{ t('dashboard.live') }}</div>
     </header>
 
-    <section class="stat-grid" aria-label="卡密統計">
+    <section class="stat-grid" :aria-label="t('dashboard.statsAria')">
       <article v-for="(card, i) in cards" :key="card.key" class="stat-card" :class="`tone-${card.tone}`" :style="{ '--delay': `${i * 55}ms` }">
         <div class="stat-top"><span>{{ String(i + 1).padStart(2, '0') }}</span><component :is="card.icon" /></div>
         <strong>{{ value(card.key).toLocaleString() }}</strong>
@@ -53,8 +55,8 @@ onMounted(async () => {
     <section class="dashboard-grid">
       <article class="panel trend-panel">
         <div class="panel-head">
-          <div><p class="eyebrow">14 DAY ACTIVITY</p><h2>啟用趨勢</h2></div>
-          <div class="rate-dial"><strong>{{ activeRate }}%</strong><span>啟用率</span></div>
+          <div><p class="eyebrow">14 DAY ACTIVITY</p><h2>{{ t('dashboard.trend') }}</h2></div>
+          <div class="rate-dial"><strong>{{ activeRate }}%</strong><span>{{ t('dashboard.rate') }}</span></div>
         </div>
         <div v-if="stats?.activations.length" class="chart-wrap">
           <div class="chart-grid" aria-hidden="true"><span /><span /><span /><span /></div>
@@ -66,17 +68,17 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <el-empty v-else description="近 14 天尚無啟用紀錄" />
+        <el-empty v-else :description="t('dashboard.empty')" />
       </article>
 
       <article class="panel key-panel">
         <div class="key-visual" aria-hidden="true"><Key /><span>ED</span></div>
         <p class="eyebrow">CLIENT PUBLIC KEY</p>
-        <h2>Ed25519 公鑰</h2>
-        <p>將此公鑰內嵌至客戶端，驗證伺服器簽發的授權內容。</p>
-        <div class="key-preview">{{ pubkey ? `${pubkey.slice(0, 56)}…` : '正在取得公鑰…' }}</div>
+        <h2>{{ t('dashboard.publicKey') }}</h2>
+        <p>{{ t('dashboard.publicKeyDescription') }}</p>
+        <div class="key-preview">{{ pubkey ? `${pubkey.slice(0, 56)}…` : t('dashboard.loadingKey') }}</div>
         <button class="copy-key" type="button" :disabled="!pubkey" @click="copyKey">
-          <span>{{ copied ? '已複製' : '複製完整公鑰' }}</span><Check v-if="copied" /><CopyDocument v-else />
+          <span>{{ copied ? t('dashboard.copied') : t('dashboard.copyKey') }}</span><Check v-if="copied" /><CopyDocument v-else />
         </button>
       </article>
     </section>

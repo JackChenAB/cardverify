@@ -176,7 +176,7 @@ export const adminApiMock = {
   pubkey: () =>
     delay({
       publicKeyPem:
-        '-----BEGIN PUBLIC KEY-----\n(DEMO 模式佔位字串，正式環境由後端提供真實 Ed25519 公鑰)\n-----END PUBLIC KEY-----',
+        '-----BEGIN PUBLIC KEY-----\nDEMO_PLACEHOLDER_USE_BACKEND_ED25519_PUBLIC_KEY\n-----END PUBLIC KEY-----',
     }),
 
   exportCsv: async (params: Record<string, any>) => {

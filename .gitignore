@@ -9,13 +9,26 @@ frontend/dist
 
 # env / secrets
 .env
+.env.*
+!.env.example
 *.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.dump
 
 # editor / OS
 .vs/
 .idea/
+*.code-workspace
 .DS_Store
 *.log
+
+# local verification artifacts
+.verification/
 
 # local dev embedded postgres data
 backend/.pgdata/
