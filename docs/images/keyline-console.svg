@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">Keyline admin console overview</title>
+  <desc id="desc">A stylized preview of the Keyline license inventory and realtime dashboard.</desc>
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#173d31"/>
+      <stop offset="1" stop-color="#081b16"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#c9ff83"/>
+      <stop offset="1" stop-color="#98d94d"/>
+    </linearGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M42 0H0V42" fill="none" stroke="#17372d" stroke-opacity=".065"/>
+    </pattern>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="145%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#071b15" flood-opacity=".18"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="820" rx="34" fill="#e9eee3"/>
+  <rect width="1440" height="820" rx="34" fill="url(#grid)"/>
+  <g filter="url(#shadow)">
+    <rect x="42" y="38" width="1356" height="744" rx="28" fill="#f7f9f3" stroke="#ced8cc"/>
+    <path d="M70 38h280v744H70a28 28 0 0 1-28-28V66a28 28 0 0 1 28-28Z" fill="url(#night)"/>
+  </g>
+
+  <!-- sidebar -->
+  <rect x="78" y="76" width="54" height="54" rx="14" fill="url(#mint)"/>
+  <text x="105" y="111" text-anchor="middle" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#10251f">K</text>
+  <text x="150" y="99" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#f5f8ee" letter-spacing="1.5">KEYLINE</text>
+  <text x="150" y="120" font-family="monospace" font-size="9" fill="#8ca097" letter-spacing="2">LICENSE CONTROL</text>
+  <text x="78" y="181" font-family="monospace" font-size="10" fill="#7d9188" letter-spacing="2">CONTROL PANEL</text>
+  <rect x="64" y="204" width="264" height="76" rx="18" fill="#ffffff" fill-opacity=".09" stroke="#b7f36b" stroke-opacity=".22"/>
+  <rect x="64" y="226" width="4" height="32" rx="2" fill="#b7f36b"/>
+  <text x="86" y="244" font-family="monospace" font-size="10" fill="#b7f36b">01</text>
+  <text x="128" y="239" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#f5f8ee">卡密管理</text>
+  <text x="128" y="259" font-family="monospace" font-size="9" fill="#89a097">LICENSES</text>
+  <text x="86" y="326" font-family="monospace" font-size="10" fill="#769143">02</text>
+  <text x="128" y="321" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#9aaba4">統計儀表板</text>
+  <text x="128" y="341" font-family="monospace" font-size="9" fill="#61766e">OVERVIEW</text>
+  <circle cx="84" cy="717" r="5" fill="#b7f36b"/>
+  <text x="100" y="713" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#f5f8ee">服務運作中</text>
+  <text x="100" y="731" font-family="monospace" font-size="9" fill="#758b82">ALL SYSTEMS OPERATIONAL</text>
+
+  <!-- top bar -->
+  <line x1="350" y1="116" x2="1398" y2="116" stroke="#dce2d7"/>
+  <text x="392" y="79" font-family="monospace" font-size="10" fill="#91a097" letter-spacing="2">KEYLINE / 01</text>
+  <text x="392" y="99" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#10211d">卡密管理</text>
+  <rect x="1262" y="65" width="36" height="36" rx="10" fill="#b7f36b"/>
+  <text x="1280" y="89" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#10251f">A</text>
+  <text x="1310" y="82" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#10211d">admin</text>
+  <text x="1310" y="98" font-family="monospace" font-size="8" fill="#8b9992">ADMINISTRATOR</text>
+
+  <!-- page title -->
+  <text x="392" y="162" font-family="monospace" font-size="10" font-weight="700" fill="#77a832" letter-spacing="2">LICENSE INVENTORY / CONTROL</text>
+  <text x="392" y="209" font-family="Arial, sans-serif" font-size="38" font-weight="700" fill="#10211d">管理每一組存取憑證。</text>
+  <text x="392" y="239" font-family="Arial, sans-serif" font-size="13" fill="#6b7b74">搜尋、發行與維護卡密狀態。所有關鍵操作集中在同一個工作視圖。</text>
+  <rect x="1160" y="182" width="92" height="42" rx="12" fill="#ffffff" stroke="#d8ded4"/>
+  <text x="1206" y="208" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#52615b">匯出 CSV</text>
+  <rect x="1263" y="182" width="105" height="42" rx="12" fill="url(#mint)"/>
+  <text x="1315" y="208" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#10251f">＋ 批量產卡</text>
+
+  <!-- filters -->
+  <rect x="392" y="275" width="976" height="135" rx="22" fill="#fbfcf7" stroke="#dce2d7"/>
+  <text x="418" y="309" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#10211d">☷  篩選條件</text>
+  <text x="510" y="309" font-family="monospace" font-size="8" fill="#98a39e" letter-spacing="1.5">FILTER SET</text>
+  <text x="1340" y="309" text-anchor="end" font-family="monospace" font-size="10" font-weight="700" fill="#10211d">19 組結果</text>
+  <line x1="418" y1="328" x2="1340" y2="328" stroke="#e5e9e1"/>
+  <g font-family="Arial, sans-serif" font-size="10" fill="#687770">
+    <text x="423" y="353">狀態</text><text x="649" y="353">卡密</text><text x="940" y="353">裝置 HWID</text>
+  </g>
+  <g fill="#ffffff" stroke="#dce2d7">
+    <rect x="418" y="362" width="205" height="34" rx="10"/>
+    <rect x="644" y="362" width="272" height="34" rx="10"/>
+    <rect x="936" y="362" width="250" height="34" rx="10"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="10" fill="#a0aaa5">
+    <text x="433" y="384">全部狀態</text><text x="661" y="384">⌕  輸入卡密片段</text><text x="953" y="384">▣  輸入機器碼</text>
+  </g>
+  <rect x="1200" y="362" width="140" height="34" rx="10" fill="#10251f"/>
+  <text x="1270" y="384" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#f5f8ee">⌕ 套用篩選</text>
+
+  <!-- table -->
+  <rect x="392" y="428" width="976" height="316" rx="22" fill="#fbfcf7" stroke="#dce2d7"/>
+  <text x="418" y="467" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#10211d">卡密清單</text>
+  <rect x="1249" y="447" width="91" height="34" rx="10" fill="#fff8ef" stroke="#f0c99f"/>
+  <text x="1295" y="469" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#bd7b36">◷ 加時長</text>
+  <rect x="418" y="495" width="922" height="40" rx="8" fill="#f1f4ec"/>
+  <g font-family="monospace" font-size="8" fill="#77867f" letter-spacing="1">
+    <text x="452" y="520">CARD KEY</text><text x="691" y="520">STATUS</text><text x="808" y="520">REMAINING</text><text x="950" y="520">HWID</text><text x="1094" y="520">PRESENCE</text><text x="1246" y="520">ACTION</text>
+  </g>
+  <g stroke="#e8ebe5">
+    <line x1="418" y1="580" x2="1340" y2="580"/><line x1="418" y1="625" x2="1340" y2="625"/><line x1="418" y1="670" x2="1340" y2="670"/>
+  </g>
+  <g font-family="monospace" font-size="10" fill="#33463f">
+    <text x="452" y="563">8NFN-V66S-N2J5-PUMD</text><text x="452" y="608">D3UY-RH4B-XAXU-U2KV</text><text x="452" y="653">ABCF-6DWV-ZJG2-7TSL</text><text x="452" y="698">FUZW-B6HC-2UMX-PTSR</text>
+  </g>
+  <g font-family="monospace" font-size="8" font-weight="700">
+    <rect x="682" y="545" width="64" height="24" rx="12" fill="#fde9e9"/><text x="714" y="561" text-anchor="middle" fill="#d84d49">BANNED</text>
+    <rect x="682" y="590" width="64" height="24" rx="12" fill="#e8f7db"/><text x="714" y="606" text-anchor="middle" fill="#548f26">ACTIVE</text>
+    <rect x="682" y="635" width="64" height="24" rx="12" fill="#eef0ec"/><text x="714" y="651" text-anchor="middle" fill="#75817b">UNUSED</text>
+    <rect x="682" y="680" width="64" height="24" rx="12" fill="#e8f7db"/><text x="714" y="696" text-anchor="middle" fill="#548f26">ACTIVE</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="10" fill="#60706a">
+    <text x="808" y="561" fill="#d84d49">已封禁</text><text x="808" y="606">24 天 23 時</text><text x="808" y="651">30 天（未啟用）</text><text x="808" y="696">24 天 23 時</text>
+    <text x="950" y="561" fill="#9ba5a0">尚未綁定</text><text x="950" y="606">HW-1007</text><text x="950" y="651" fill="#9ba5a0">尚未綁定</text><text x="950" y="696">HW-1002</text>
+    <text x="1094" y="561" fill="#9ba5a0">離線 · 從未</text><text x="1094" y="606">● 在線</text><text x="1094" y="651" fill="#9ba5a0">離線 · 從未</text><text x="1094" y="696">● 在線</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#64736d">
+    <text x="1246" y="561">解封  ·  解綁</text><text x="1246" y="606">封禁  ·  解綁</text><text x="1246" y="651">封禁  ·  解綁</text><text x="1246" y="696">封禁  ·  解綁</text>
+  </g>
+</svg>

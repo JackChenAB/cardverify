@@ -11,6 +11,10 @@
 
 </div>
 
+<p align="center">
+  <img src="./docs/images/keyline-console.svg" alt="Keyline 授權管理後台介面預覽" width="100%">
+</p>
+
 ---
 
 ## Project map / 專案導覽
@@ -25,15 +29,9 @@ cardverify/
 └─ .env.example        Environment-variable template
 ```
 
-```mermaid
-flowchart LR
-    Client[Native client] -->|HMAC signed request| Nginx[Nginx / Frontend :80]
-    Admin[Admin browser] --> Nginx
-    Nginx -->|/api and /admin| API[NestJS :3000]
-    API --> DB[(PostgreSQL)]
-    API --> Cache[(Redis)]
-    API -->|Ed25519 signed response| Client
-```
+<p align="center">
+  <img src="./docs/images/keyline-architecture.svg" alt="Keyline 部署架構與簽章請求流程" width="100%">
+</p>
 
 ---
 
@@ -51,6 +49,10 @@ Keyline 是一套面向桌面程式或原生客戶端的授權卡密系統。管
 - **管理後台**：批量產卡、搜尋、篩選、排序、加時、CSV 匯出與統計儀表板。
 - **雙向驗證**：請求使用 HMAC-SHA256；回應使用 Ed25519。
 - **容器化部署**：前端、後端、PostgreSQL 與 Redis 由 Docker Compose 管理。
+
+<p align="center">
+  <img src="./docs/images/keyline-lifecycle.svg" alt="卡密從發行、啟用、驗證到到期或撤銷的生命週期" width="100%">
+</p>
 
 ## 部署方式一：全新 Docker Compose 部署
 
